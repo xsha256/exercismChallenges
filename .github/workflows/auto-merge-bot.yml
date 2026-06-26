@@ -1,0 +1,29 @@
+name: Auto-Aprobar y Merge de Exercism Bot
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge-bot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'exercism-solutions-syncer[bot]'
+    
+    steps:
+      - name: Aprobar PR del Bot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review "${{ github.event.pull_request.html_url }}" --approve -b "Bot: Aprobación automática."
+
+      - name: Hacer Merge automático
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge "${{ github.event.pull_request.html_url }}" --merge --delete-branch
